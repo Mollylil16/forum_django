@@ -1,0 +1,46 @@
+{% extends 'forum/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg p-4 border-0 rounded-3">
+        <h2 class="text-center mb-4">Message de {{ message.sender.username }}</h2>
+        
+        <div class="message-content mb-4">
+            <p><strong>Contenu :</strong></p>
+            <div class="p-3 border rounded bg-light">
+                <p>{{ message.content }}</p>
+            </div>
+        </div>
+
+        <h3 class="text-center mt-4">Répondre</h3>
+        <form method="post" class="p-3">
+            {% csrf_token %}
+            <div class="form-group mb-3">
+                {{ form.as_p }}
+            </div>
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg px-5">Envoyer la réponse</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Custom styling for a cleaner look */
+    .container h2, .container h3 {
+        color: #4A4A4A;
+    }
+    .message-content p {
+        font-size: 1.1em;
+        color: #333;
+    }
+    .card {
+        background-color: #f9f9f9;
+        border: 1px solid #e0e0e0;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+</style>
+{% endblock %}

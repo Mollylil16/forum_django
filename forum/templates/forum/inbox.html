@@ -1,0 +1,25 @@
+{% extends "forum/base.html" %}
+
+{% block content %}
+<h2 class="mb-4">Ma Boîte de Réception</h2>
+<div class="list-group">
+    {% for message in messages %}
+        <a href="{% url 'view_message' message.id %}" class="list-group-item list-group-item-action border-0 rounded shadow-sm mb-3">
+            <div class="d-flex align-items-center">
+                <div class="avatar bg-primary text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                    {{ message.sender.username|slice:":1" }}
+                </div>
+                <div class="ms-3">
+                    <h5 class="mb-1">{{ message.sender.username }}</h5>
+                    <p class="mb-1 text-secondary">{{ message.content|truncatewords:10 }}</p>
+                    <small class="text-muted">{{ message.timestamp|date:"d/m/Y H:i" }}</small>
+                </div>
+            </div>
+        </a>
+    {% empty %}
+        <div class="alert alert-info mt-4">
+            <p class="mb-0">Vous n'avez aucun message. <a href="{% url 'send_message' %}">Envoyez un message</a> pour commencer la conversation.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

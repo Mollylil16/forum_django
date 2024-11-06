@@ -1,0 +1,44 @@
+{% extends 'forum/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="card shadow-lg mb-4 rounded border-light">
+    <div class="card-body">
+        <h3 class="card-title text-primary">{{ post.title }}</h3>
+        <p class="card-text text-muted">{{ post.content }}</p>
+        {% if post.image %}
+            <img src="{{ post.image.url }}" alt="Image de la publication" class="img-fluid rounded my-4 shadow-sm">
+        {% endif %}
+        <!-- Bouton pour envoyer un message à l'auteur -->
+        <a href="{% url 'send_message' post.author.id %}" class="btn btn-secondary mt-3 rounded-pill shadow-sm">Envoyer un message à l'auteur</a>
+    </div>
+</div>
+
+<h4 class="text-center text-secondary mb-4">Commentaires</h4>
+{% for comment in comments %}
+    <div class="media mt-4 p-3 border rounded shadow-sm bg-light">
+        <img class="mr-3 rounded-circle" src="{% static 'marc.jpg' %}" alt="Avatar" width="60">
+        <div class="media-body">
+            <h5 class="mt-0 text-dark">{{ comment.author.username }}</h5>
+            <p>{{ comment.content }}</p>
+            <small class="text-muted">Publié le {{ comment.created_at|date:"d/m/Y H:i" }}</small>
+
+            <!-- Afficher le bouton de suppression seulement si l'utilisateur est l'auteur du commentaire -->
+            {% if comment.author == request.user %}
+                <a href="{% url 'delete_comment' comment.id %}" class="btn btn-danger btn-sm mt-2 rounded-pill">Supprimer</a>
+            {% endif %}
+        </div>
+    </div>
+{% empty %}
+    <p class="text-muted text-center">Aucun commentaire pour le moment.</p>
+{% endfor %}
+
+<h4 class="mt-4 text-center">Ajouter un commentaire</h4>
+<form method="post" class="mt-3">
+    {% csrf_token %}
+    <div class="form-group">
+        {{ comment_form.as_p }}
+    </div>
+    <button type="submit" class="btn btn-primary btn-lg btn-block rounded-pill shadow-sm">Commenter</button>
+</form>
+{% endblock %}

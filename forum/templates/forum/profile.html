@@ -1,0 +1,44 @@
+{% extends 'forum/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg p-4 border-0 rounded-3 mx-auto" style="max-width: 600px;">
+        <h2 class="text-center mb-4">Mon Profil</h2>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group mb-3">
+                {{ form.as_p }}
+            </div>
+            
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-lg px-5">Mettre à jour</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .container h2 {
+        color: #4A4A4A;
+    }
+    .card {
+        background-color: #f9f9f9;
+        border: 1px solid #e0e0e0;
+    }
+    .form-group label {
+        font-weight: bold;
+        color: #333;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    .card input, .card select, .card textarea {
+        border-radius: 5px;
+        border: 1px solid #ced4da;
+        padding: 10px;
+        width: 100%;
+    }
+</style>
+{% endblock %}
