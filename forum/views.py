@@ -7,7 +7,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy
 from .forms import UserRegisterForm, PostForm, CommentForm, ProfileForm, MessageForm
-from .models import Post, Comment, Message, UserProfile, User
+from .models import Post, Comment, Message, UserProfile, User, Like, Follow
 from django.views import View  # Import de View pour la classe ProfileView
 from django.http import Http404
 
@@ -166,3 +166,55 @@ def delete_comment(request, comment_id):
     if comment.author == request.user:
         comment.delete()  # Supprimer le commentaire
     return redirect('post_detail', pk=comment.post.pk)
+
+@login_required
+def toggle_follow(request, user_id):
+    user_to_follow = get_object_or_404(User, id=user_id)
+    follow, created = Follow.objects.get_or_create(follower=request.user, following=user_to_follow)
+    if not created:  # Already following, so unfollow
+        follow.delete()
+    return redirect('profile', user_id=user_to_follow.id)
+ 
+
+@login_required
+def like_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    
+    # Vérifier si l'utilisateur a déjà un like ou dislike pour ce post
+    existing_like = Like.objects.filter(user=request.user, post=post).first()
+    
+    if existing_like:
+        if existing_like.value == 'like':  # L'utilisateur a déjà liké, il peut enlever son like
+            existing_like.delete()
+        elif existing_like.value == 'dislike':  # L'utilisateur a déjà disliké, changer en like
+            existing_like.value = 'like'
+            existing_like.save()
+    else:
+        # Créer un nouveau "like" si aucun "like" ou "dislike" existant
+        Like.objects.create(user=request.user, post=post, value='like')
+
+    return redirect('post_detail', pk=post.id)
+
+@login_required
+def dislike_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    
+    # Vérifier si l'utilisateur a déjà un like ou dislike pour ce post
+    existing_like = Like.objects.filter(user=request.user, post=post).first()
+    
+    if existing_like:
+        if existing_like.value == 'dislike':  # L'utilisateur a déjà disliké, il peut enlever son dislike
+            existing_like.delete()
+        elif existing_like.value == 'like':  # L'utilisateur a déjà liké, changer en dislike
+            existing_like.value = 'dislike'
+            existing_like.save()
+    else:
+        # Créer un nouveau "dislike" si aucun "like" ou "dislike" existant
+        Like.objects.create(user=request.user, post=post, value='dislike')
+
+    return redirect('post_detail', pk=post.id)
+
+def chat_room(request, room_name):
+    return render(request, 'chat/chat_room.html', {
+        'room_name': room_name
+    })

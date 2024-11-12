@@ -102,12 +102,14 @@ CHANNEL_LAYERS = {
     },
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.mailgun.org"
 EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'mollylil663@gmail'  # Remplacez par votre email
-EMAIL_HOST_PASSWORD = 'vwqw pezb czjx rwsp'
+EMAIL_HOST_USER = "postmaster@sandboxbed9220fb19646dd8b59a7d738407c33.mailgun.org"
+SECRET_KEY = 'bbcd271b602a31b6f410a38cc6834678-f6fe91d3-5bc2e3e3'
+
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

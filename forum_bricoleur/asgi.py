@@ -2,16 +2,15 @@ import os
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-from django.urls import path
+from forum_bricoleur.routing import websocket_urlpatterns  # Remplacez "votre_projet" par le nom de votre projet
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'forum_bricoleur.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'votre_projet.settings')
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
-        URLRouter([
-            # URL du chat WebSocket
-            path("ws/chat/<str:room_name>/", consumers.ChatConsumer.as_asgi()),
-        ])
+        URLRouter(
+            websocket_urlpatterns
+        )
     ),
 })

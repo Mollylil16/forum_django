@@ -28,8 +28,9 @@ class Comment(models.Model):
 class Message(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
-    message = models.TextField()  # Ce champ doit exister pour être utilisé dans le formulaire
+    message = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)  # Nouveau champ
 
     def __str__(self):
         return f"Message from {self.sender} to {self.recipient} - {self.timestamp}"
@@ -52,3 +53,28 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.userprofile.save()
+
+# Follow model for user subscriptions
+class Follow(models.Model):
+    follower = models.ForeignKey(User, related_name="following", on_delete=models.CASCADE)
+    following = models.ForeignKey(User, related_name="followers", on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('follower', 'following')
+
+    def __str__(self):
+        return f"{self.follower.username} follows {self.following.username}"
+
+# Like model for posts
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey('Post', related_name="likes", on_delete=models.CASCADE)
+    value = models.CharField(max_length=10, choices=(("like", "Like"), ("dislike", "Dislike")))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'post')
+
+    def __str__(self):
+        return f"{self.user.username} {self.value}d {self.post.title}"

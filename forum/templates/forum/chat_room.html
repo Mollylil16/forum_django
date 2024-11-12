@@ -1,0 +1,66 @@
+{% extends 'forum/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg p-5 border-0 rounded-4">
+        <h2 class="text-center mb-4 text-primary">Chat en direct avec <strong>{{ room_name }}</strong></h2>
+        
+        <!-- Zone d'affichage des messages -->
+        <div id="chat-log" class="mb-4 p-4 border rounded bg-light" style="height: 300px; overflow-y: auto;">
+            <!-- Les messages seront insérés ici par JavaScript -->
+        </div>
+
+        <!-- Formulaire d'envoi de message -->
+        <form id="chat-form" class="p-3">
+            {% csrf_token %}
+            <div class="input-group">
+                <input id="chat-message-input" type="text" name="message" class="form-control border-start-0" placeholder="Tapez votre message ici...">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-send-fill me-2"></i> Envoyer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const roomName = "{{ room_name }}";
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+    );
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('#chat-log').innerHTML += `<div><strong>${data.username}:</strong> ${data.message}</div>`;
+        document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    document.querySelector('#chat-form').onsubmit = function(e) {
+        e.preventDefault();
+        const messageInputDom = document.querySelector('#chat-message-input');
+        const message = messageInputDom.value;
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
+        messageInputDom.value = '';
+    };
+</script>
+
+<style>
+    .container h2 {
+        color: #4A4A4A;
+    }
+    #chat-log div {
+        font-size: 1.1em;
+        color: #333;
+    }
+    .card {
+        background-color: #f9f9f9;
+        border: 1px solid #e0e0e0;
+    }
+</style>
+{% endblock %}

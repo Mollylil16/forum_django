@@ -9,8 +9,28 @@
         {% if post.image %}
             <img src="{{ post.image.url }}" alt="Image de la publication" class="img-fluid rounded my-4 shadow-sm">
         {% endif %}
+
+        <!-- Boutons Like et Dislike avec compteur -->
+        <div class="d-flex justify-content-start align-items-center mt-3">
+            <a href="{% url 'like_post' post.id %}" class="btn btn-outline-primary btn-sm rounded-pill mr-2">
+                👍 J'aime <span class="badge badge-light">{{ post.likes.count }}</span>
+            </a>
+            <a href="{% url 'dislike_post' post.id %}" class="btn btn-outline-danger btn-sm rounded-pill mr-2">
+                👎 Je n'aime pas <span class="badge badge-light">{{ post.dislikes.count }}</span>
+            </a>
+        </div>
+
         <!-- Bouton pour envoyer un message à l'auteur -->
         <a href="{% url 'send_message' post.author.id %}" class="btn btn-secondary mt-3 rounded-pill shadow-sm">Envoyer un message à l'auteur</a>
+
+        <!-- Bouton pour s'abonner/désabonner de l'auteur -->
+        {% if request.user != post.author %}
+            {% if request.user in post.author.followers.all %}
+                <a href="{% url 'toggle_follow' post.author.id %}" class="btn btn-outline-danger mt-3 rounded-pill shadow-sm">Se désabonner</a>
+            {% else %}
+                <a href="{% url 'toggle_follow' post.author.id %}" class="btn btn-outline-primary mt-3 rounded-pill shadow-sm">S'abonner</a>
+            {% endif %}
+        {% endif %}
     </div>
 </div>
 
