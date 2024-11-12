@@ -1,3 +1,4 @@
+<!-- profile.html -->
 {% extends 'forum/base.html' %}
 
 {% block content %}
@@ -7,10 +8,15 @@
 
         <!-- Profil utilisateur -->
         <div class="text-center mb-4">
-            <img src="{{ user.userprofile.photo.url }}" alt="Photo de profil" class="rounded-circle" width="100" height="100">
-            <h4 class="mt-3">{{ user.username }}</h4>
+            <!-- Vérification de la photo de profil -->
+            {% if user.userprofile.profile_picture %}
+                <img src="{{ user.userprofile.profile_picture.url }}" alt="Photo de profil" class="rounded-circle" width="100" height="100">
+            {% else %}
+                <img src="/media/default-profile.jpg" alt="Photo de profil" class="rounded-circle" width="100" height="100">
+            {% endif %}
+            <h4 class="mt-3">{{ user.userprofile.full_name|default:user.username }}</h4>
             <p>{{ user.userprofile.bio }}</p>
-            
+
             {% if user != request.user %}
                 {% if request.user in user.followers.all %}
                     <a href="{% url 'toggle_follow' user.id %}" class="btn btn-outline-danger">Se désabonner</a>
@@ -21,7 +27,7 @@
         </div>
 
         <!-- Formulaire de mise à jour de profil -->
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-group mb-3">
                 {{ form.as_p }}
@@ -49,5 +55,4 @@
         </div>
     </div>
 </div>
-
 {% endblock %}

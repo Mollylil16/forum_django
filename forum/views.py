@@ -5,7 +5,7 @@ from django.contrib.auth.views import LoginView, PasswordResetView, PasswordRese
 from django.contrib.auth.forms import PasswordChangeForm
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from .forms import UserRegisterForm, PostForm, CommentForm, ProfileForm, MessageForm
 from .models import Post, Comment, Message, UserProfile, User, Like, Follow
 from django.views import View  # Import de View pour la classe ProfileView
@@ -95,31 +95,27 @@ def send_message(request, recipient_id):
     return render(request, 'forum/send_message.html', {'form': form, 'recipient': recipient})
 
 
-# Nouvelle classe ProfileView
-@method_decorator(login_required, name='dispatch')  # Applique le décorateur à la méthode dispatch
+# ProfileView pour gérer l'affichage et la mise à jour du profil utilisateur
+@method_decorator(login_required, name='dispatch')
 class ProfileView(View):
-    def get(self, request, *args, **kwargs):
-        try:
-            # Vérifier si le profil existe pour l'utilisateur
-            user_profile = request.user.userprofile
-        except UserProfile.DoesNotExist:
-            # Créer un profil utilisateur vide si celui-ci n'existe pas
-            user_profile = UserProfile.objects.create(user=request.user)
+    def get(self, request, user_id, *args, **kwargs):
+        user = get_object_or_404(User, id=user_id)
+        user_profile, created = UserProfile.objects.get_or_create(user=user)
 
+        # Charger le formulaire avec les informations du profil
         form = ProfileForm(instance=user_profile)
-        return render(request, 'forum/profile.html', {'form': form})
+        return render(request, 'forum/profile.html', {'form': form, 'user': user})
 
-    def post(self, request, *args, **kwargs):
-        try:
-            user_profile = request.user.userprofile
-        except UserProfile.DoesNotExist:
-            user_profile = UserProfile.objects.create(user=request.user)
+    def post(self, request, user_id, *args, **kwargs):
+        user = get_object_or_404(User, id=user_id)
+        user_profile, created = UserProfile.objects.get_or_create(user=user)
 
-        form = ProfileForm(request.POST, instance=user_profile)
+        # Mettre à jour le profil de l'utilisateur avec les nouvelles informations
+        form = ProfileForm(request.POST, request.FILES, instance=user_profile)
         if form.is_valid():
             form.save()
-            return redirect('profile')
-        return render(request, 'forum/profile.html', {'form': form})
+            return redirect('profile', user_id=user_id)  # Redirige vers la page du profil mis à jour
+        return render(request, 'forum/profile.html', {'form': form, 'user': user})
 
 @login_required
 def password_change(request):
@@ -214,7 +210,12 @@ def dislike_post(request, post_id):
 
     return redirect('post_detail', pk=post.id)
 
+@login_required
 def chat_room(request, room_name):
-    return render(request, 'chat/chat_room.html', {
-        'room_name': room_name
+    user_id = request.user.id  # Récupère l'ID de l'utilisateur connecté
+    profile_url = reverse('profile', kwargs={'user_id': user_id})  # Crée l'URL du profil
+
+    return render(request, 'forum/chat_room.html', {
+        'room_name': room_name,
+        'profile_url': profile_url,  # Passe l'URL du profil dans le contexte
     })

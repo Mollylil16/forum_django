@@ -27,7 +27,14 @@
                             <a class="nav-link" href="{% url 'inbox' %}"><i class="bi bi-envelope"></i> Boîte de réception</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'profile' %}"><i class="bi bi-person"></i> Mon profil</a>
+                            <a class="nav-link" href="{% url 'profile' user_id=user.id %}">
+                                {% if user.userprofile.profile_picture %}
+                                    <img src="{{ user.userprofile.profile_picture.url }}" alt="Photo de profil" class="rounded-circle" width="30" height="30">
+                                {% else %}
+                                    <i class="bi bi-person"></i>
+                                {% endif %}
+                                {{ user.userprofile.full_name|default:user.username }}
+                            </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-danger" href="{% url 'logout' %}">Se déconnecter</a>
